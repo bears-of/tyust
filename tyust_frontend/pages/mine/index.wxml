@@ -1,0 +1,83 @@
+<cu-custom bgColor="bg-gradual-blue" isBack="{{false}}">
+  <view slot="content">个人中心</view>
+</cu-custom>
+
+<view class="page-container">
+  <view class="top-decoration"></view>
+
+  <view class="content-wrapper">
+    
+    <view class="user-card">
+      <view class="card-inner">
+        <button class="user-avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image src="{{userInfo.avatarUrl || '/asset/imgs/avatar.png'}}" mode="aspectFill" class="avatar-img"></image>
+          <view class="avatar-edit-icon">
+            <van-icon name="photograph" color="#fff" size="12px" />
+          </view>
+        </button>
+        
+        <view class="user-info-box">
+          <view class="user-name-row">
+            <text class="user-name">{{userInfo.name || '点击登录'}}</text>
+            <view class="login-tag" wx:if="{{!isLogin}}">未登录</view>
+          </view>
+          
+          <view class="user-meta" wx:if="{{isLogin}}">
+            <view class="meta-tag class-tag">
+              <van-icon name="friends" size="12px" style="margin-right:4px"/>
+              {{userInfo.class || '暂无班级'}}
+            </view>
+            <view class="meta-tag id-tag">ID: {{userInfo.studentId}}</view>
+          </view>
+          <view class="user-desc" wx:else>登录以使用校园服务</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="menu-card">
+      <view class="card-header">
+        <text class="header-title">学习助手</text>
+      </view>
+      <van-grid column-num="2" border="{{false}}" gutter="{{10}}">
+        <van-grid-item use-slot url="/pages/course/index" link-type="navigateTo">
+          <view class="grid-custom-item">
+            <view class="icon-box blue-icon">
+              <van-icon name="calendar-o" size="24px" color="#fff"/>
+            </view>
+            <text class="grid-text">我的课表</text>
+            <text class="grid-sub">查看本周课程</text>
+          </view>
+        </van-grid-item>
+        <van-grid-item use-slot url="/pages/score/index" link-type="navigateTo">
+          <view class="grid-custom-item">
+            <view class="icon-box orange-icon">
+              <van-icon name="chart-trending-o" size="24px" color="#fff"/>
+            </view>
+            <text class="grid-text">成绩查询</text>
+            <text class="grid-sub">期末成绩概览</text>
+          </view>
+        </van-grid-item>
+      </van-grid>
+    </view>
+
+    <view class="menu-card">
+      <view class="card-header">
+        <text class="header-title">更多服务</text>
+      </view>
+      <view class="list-wrapper">
+        <van-cell title="关于我们" is-link bindtap="showAbout" icon="info-o" border="{{false}}" custom-class="custom-cell"/>
+        <van-cell title="退出登录" is-link bindtap="logout" icon="close" wx:if="{{isLogin}}" border="{{false}}" custom-class="custom-cell"/>
+      </view>
+    </view>
+
+  </view>
+</view>
+
+<van-dialog
+  id="van-dialog"
+  show="{{showAboutDialog}}"
+  title="关于"
+  message="太原科技大学校园助手\n版本: 1.0.0"
+  confirm-button-text="确定"
+  bind:close="closeAbout"
+/>

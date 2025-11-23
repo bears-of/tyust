@@ -1,0 +1,224 @@
+/* 全局设置 */
+page {
+  background-color: #f6f7f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --theme: #409eff; /* 定义主题变量，防止旧代码报错 */
+}
+
+/* 刷新按钮（保留原样式） */
+.refresh-btn {
+  width: 52rpx;
+  height: 52rpx;
+}
+
+/* === 顶部周次选择条 === */
+.week-list {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 110rpx;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  z-index: 10;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  border-bottom-left-radius: 24rpx;
+  border-bottom-right-radius: 24rpx;
+}
+
+/* 左侧月份 */
+.now-month {
+  width: 80rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 月份下面的小字 */
+.now-month text:last-child {
+  font-size: 20rpx;
+  color: #999;
+  font-weight: normal;
+  margin-top: 4rpx;
+}
+
+/* 每一周的容器 */
+.week-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.week-name {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 6rpx;
+}
+
+.week-date {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* === 选中状态样式 === */
+.week-item.active .week-date {
+  background-color: var(--theme);
+  color: #fff;
+  box-shadow: 0 4rpx 10rpx rgba(64, 158, 255, 0.3);
+}
+
+.week-item.active .week-name {
+  color: var(--theme);
+  font-weight: bold;
+}
+
+/* === 课表主体区域 === */
+.course-content {
+  width: 100%;
+  padding-top: 120rpx; /* 避开顶部悬浮条 */
+  display: flex;
+  padding-bottom: 40rpx;
+}
+
+/* 左侧节次栏 */
+.course-nums {
+  width: 60rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.course-num {
+  height: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #999999;
+  font-weight: 500;
+}
+
+/* 滑动区域 */
+.course-swpier {
+  width: calc(100% - 60rpx);
+  height: 1440rpx; /* 12节课 * 120rpx */
+  min-height: 100vh;
+}
+
+.course-list {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* 单个课程定位容器 */
+.course-item {
+  position: absolute;
+  width: calc(100% / 7);
+  padding: 6rpx;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.course-item:active {
+  transform: scale(0.95);
+}
+
+/* === 课程卡片内部样式 === */
+.course-item__content {
+  width: 100%;
+  height: 100%;
+  border-radius: 16rpx;
+  font-size: 22rpx;
+  color: #ffffff;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 12rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+  line-height: 1.3;
+}
+
+/* 课程名称（限制3行） */
+.course-name-text {
+  font-weight: bold;
+  margin-bottom: 6rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+/* 教室信息（沉底） */
+.course-room-text {
+  font-size: 20rpx;
+  opacity: 0.9;
+  margin-top: auto; 
+}
+
+/* === 底部切换周数弹窗 === */
+.switch-week__popup {
+  padding: 40rpx 30rpx;
+  background: #fff;
+}
+
+.switch-week__title {
+  text-align: left;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 10rpx;
+}
+
+.switch-week__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.switch-week__item {
+  width: 18%;
+  padding: 10rpx 0;
+}
+
+.switch-week__item-box {
+  width: 100%;
+  height: 90rpx;
+  background-color: #f5f7fa;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.switch-week__item-box.active {
+  background-color: var(--theme);
+  color: #fff;
+  box-shadow: 0 6rpx 16rpx rgba(64, 158, 255, 0.3);
+  transform: translateY(-2rpx);
+}

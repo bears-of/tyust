@@ -1,0 +1,243 @@
+/* 全局页面设置 */
+page {
+  background-color: #f5f7fa; /* 高级灰背景 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+}
+
+.page-container {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* === 1. 顶部装饰背景 === */
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 520rpx; /* 覆盖头部 */
+  background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); /* 鲜亮的科技蓝渐变 */
+  /* 也可以尝试这种青色系，如果不喜欢蓝色： background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); */
+  border-bottom-left-radius: 60rpx;
+  border-bottom-right-radius: 60rpx;
+  z-index: 0;
+}
+
+/* 内容包装器，确保内容在背景之上 */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  padding: 20rpx 32rpx;
+  padding-top: 120rpx; /* 留出顶部距离 */
+}
+
+/* === 2. 头部区域 === */
+.header-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  padding: 0 10rpx;
+}
+
+.greeting {
+  color: #fff;
+}
+
+.greet-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+}
+
+.greet-sub {
+  font-size: 26rpx;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+.header-logo {
+  width: 180rpx;
+  height: 80rpx; /* 调整logo比例，使其不要太大 */
+  opacity: 0.9; /* 稍微透明一点，融入背景 */
+}
+
+/* === 3. 导航卡片 === */
+.nav-card {
+  background: #ffffff;
+  border-radius: 32rpx;
+  padding: 40rpx 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 16rpx 40rpx rgba(0, 114, 255, 0.1); /* 蓝色系的投影 */
+  margin-bottom: 40rpx;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 图标增加底色容器，看起来更像 App 图标 */
+.icon-box {
+  width: 96rpx;
+  height: 96rpx;
+  /* background: #f0f7ff;  淡蓝色底 */
+  border-radius: 24rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16rpx;
+  transition: all 0.3s;
+}
+/* 点击态效果 */
+.nav-item:active .icon-box {
+  transform: scale(0.95);
+  background: #e1f0ff;
+}
+
+.nav-icon {
+  width: 72rpx;
+  height: 72rpx;
+}
+
+.nav-title {
+  font-size: 26rpx;
+  color: #555;
+  font-weight: 500;
+}
+
+/* === 4. 课表卡片 === */
+.course-card {
+  background: #ffffff;
+  border-radius: 32rpx;
+  padding: 40rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.04);
+  min-height: 300rpx;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx dashed #f0f0f0; /* 虚线分割 */
+}
+
+.title-main {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.title-sub {
+  font-size: 24rpx;
+  color: #999;
+  background: #f7f8fa;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  display: inline-block;
+}
+
+.header-right-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #ff6b6b; /* 红点装饰，活跃气氛 */
+  border-radius: 50%;
+}
+
+/* 课程列表样式 */
+.course-list-modern {
+  display: flex;
+  flex-direction: column;
+}
+
+.course-item-modern {
+  display: flex;
+  margin-bottom: 30rpx;
+}
+
+/* 左侧时间轴 */
+.item-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 24rpx;
+  padding-top: 10rpx;
+}
+
+.timeline-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  border: 4rpx solid #0072ff; /* 主题色 */
+  background: #fff;
+}
+
+.timeline-line {
+  flex: 1;
+  width: 2rpx;
+  background: #e0e0e0;
+  margin-top: 8rpx;
+  min-height: 40rpx;
+}
+
+/* 最后一个元素去掉线 */
+.course-item-modern:last-child .timeline-line {
+  display: none;
+}
+
+.item-content {
+  flex: 1;
+  background: #f9fbff; /* 极淡的蓝色块 */
+  padding: 20rpx;
+  border-radius: 16rpx;
+  border-left: 6rpx solid #0072ff;
+}
+
+.course-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.course-info {
+  display: flex;
+  align-items: center;
+}
+
+.info-loc {
+  font-size: 24rpx;
+  color: #777;
+}
+
+/* === 空状态 === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+}
+
+.empty-img {
+  width: 240rpx;
+  height: 160rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.8;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #aab;
+}

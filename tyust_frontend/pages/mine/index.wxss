@@ -1,0 +1,226 @@
+/* 页面全局设置 */
+page {
+  background-color: #f7f8fa; /* 更高级的灰白底色 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+}
+
+.page-container {
+  position: relative;
+  width: 100%;
+}
+
+/* 1. 顶部装饰背景 */
+.top-decoration {
+  height: 420rpx;
+  width: 100%;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); /* 清爽的蓝青渐变 */
+  /* 或者使用深邃一点的：background: linear-gradient(135deg, #3A1C71 0%, #D76D77 50%, #FFAF7B 100%); */
+  border-bottom-left-radius: 40rpx;
+  border-bottom-right-radius: 40rpx;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* 内容包装器 */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  padding: 20rpx 30rpx;
+  padding-top: 100rpx; /* 根据导航栏高度调整，确保不被遮挡 */
+}
+
+/* 2. 用户信息卡片 */
+.user-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10px); /* 磨砂玻璃效果 (iOS支持较好) */
+}
+
+.card-inner {
+  display: flex;
+  align-items: center;
+}
+
+/* 头像部分 */
+.user-avatar-wrapper {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  margin-right: 30rpx;
+  position: relative;
+  border: 4rpx solid #fff;
+  box-shadow: 0 6rpx 16rpx rgba(69, 90, 100, 0.2);
+  background: #fff;
+}
+
+.user-avatar-wrapper::after { border: none; }
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.avatar-edit-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #4facfe;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #fff;
+}
+
+/* 文字信息部分 */
+.user-info-box {
+  flex: 1;
+}
+
+.user-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.user-name {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.login-tag {
+  font-size: 20rpx;
+  background: #f0f0f0;
+  color: #999;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-left: 16rpx;
+}
+
+.user-desc {
+  font-size: 26rpx;
+  color: #969799;
+}
+
+.user-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.meta-tag {
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.class-tag {
+  background: #eef7fe;
+  color: #1989fa;
+}
+
+.id-tag {
+  background: #f7f8fa;
+  color: #666;
+}
+
+/* 3. 通用菜单卡片 */
+.menu-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx 20rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+
+.card-header {
+  padding: 0 10rpx 20rpx 10rpx;
+  border-bottom: 1rpx solid #f5f6f8;
+  margin-bottom: 20rpx;
+}
+
+.header-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  position: relative;
+  padding-left: 16rpx;
+}
+
+.header-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6rpx;
+  height: 24rpx;
+  background: #4facfe;
+  border-radius: 4rpx;
+}
+
+/* 自定义宫格项样式 */
+.grid-custom-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+  width: 100%;
+}
+
+.icon-box {
+  width: 90rpx;
+  height: 90rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+  box-shadow: 0 8rpx 16rpx rgba(0,0,0,0.1);
+}
+
+.blue-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.orange-icon {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+}
+
+.grid-text {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+
+.grid-sub {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 列表项微调 */
+.list-wrapper {
+  padding: 0 10rpx;
+}
+
+.custom-cell {
+  background-color: transparent !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}

@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="bg-header">
+    <image class="bg-shape" src="/asset/imgs/logo.png" mode="aspectFill"></image> <view class="welcome-text">
+      <view class="title">Welcome Back!</view>
+      <view class="sub-title">欢迎登录校园助手</view>
+    </view>
+  </view>
+
+  <view class="login-card">
+    <view class="card-header">
+      <image class="logo-img" src="/asset/imgs/logo.png" mode="aspectFit"></image>
+    </view>
+
+    <view class="form-group">
+      <view class="input-item {{stuId ? 'active' : ''}}">
+        <view class="icon-wrap">
+          <image src="/asset/imgs/user.png" mode="aspectFit"></image>
+        </view>
+        <input type="text" model:value="{{stuId}}" placeholder="请输入学号" placeholder-class="input-placeholder"/>
+      </view>
+
+      <view class="input-item {{password ? 'active' : ''}}">
+        <view class="icon-wrap">
+          <image src="/asset/imgs/password.png" mode="aspectFit"></image>
+        </view>
+        <input type="{{isPasswordVisible ? 'text' : 'password'}}" model:value="{{password}}" placeholder="请输入密码" placeholder-class="input-placeholder"/>
+        
+        <view class="eye-icon" bindtap="togglePassword">
+           <text style="color: #999; font-size: 24rpx;">{{isPasswordVisible ? '隐藏' : '显示'}}</text>
+        </view>
+      </view>
+
+      <view bindtap="switchStatus" class="remember-line">
+        <view class="check-box {{saveCount ? 'checked' : ''}}">
+          <text wx:if="{{saveCount}}" class="check-mark">✓</text>
+        </view>
+        <view class="remember-text">记住账号密码</view>
+      </view>
+
+      <button class="login-btn" bindtap="login" hover-class="btn-hover">登 录</button>
+    </view>
+  </view>
+  
+  <view class="footer-text">Copyright © 2025 Campus Helper</view>
+</view>

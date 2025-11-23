@@ -1,0 +1,64 @@
+<wxs src="../../utils/tools.wxs" module="tools"></wxs>
+
+<cu-custom bgColor="bg-transparent" isBack="{{false}}">
+  <view slot="content" style="color: #fff;">首页</view>
+</cu-custom>
+
+<view class="page-container">
+  <view class="header-bg"></view>
+
+  <view class="content-wrapper">
+    <view class="header-area">
+      <view class="greeting">
+        <view class="greet-title">Hi, 同学</view>
+        <view class="greet-sub">今天也要加油鸭 🦆</view>
+      </view>
+      <image class="header-logo" src="/asset/imgs/logo.png" mode="aspectFit"></image>
+    </view>
+
+    <view class="nav-card">
+      <view bindtap="nav" data-index="{{index}}" class="nav-item" wx:for="{{navList}}" wx:key="index">
+        <view class="icon-box">
+          <image class="nav-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        </view>
+        <view class="nav-title">{{item.title}}</view>
+      </view>
+    </view>
+
+    <view class="course-card">
+      <view class="card-header">
+        <view class="header-left">
+          <view class="title-main">今日课表</view>
+          <view class="title-sub">第{{todayWeeks}}周 周{{tools.getWeekText(todayWeek)}}</view>
+        </view>
+        <view class="header-right-dot"></view>
+      </view>
+
+      <view class="card-body">
+        <block wx:if="{{todayCourseList.length == 0}}">
+          <view class="empty-state">
+            <image class="empty-img" src="/asset/imgs/empty.png" mode="aspectFit"></image>
+            <view class="empty-text">今天没有课，去图书馆充实一下吧~</view>
+          </view>
+        </block>
+
+        <block wx:else>
+          <view class="course-list-modern">
+            <view class="course-item-modern" wx:for="{{todayCourseList}}" wx:key="num">
+              <view class="item-timeline">
+                <view class="timeline-dot"></view>
+                <view class="timeline-line"></view>
+              </view>
+              <view class="item-content">
+                <view class="course-name">{{item.name}}</view>
+                <view class="course-info">
+                  <text class="info-loc">📍 {{item.address ? item.address : '未知地点'}}</text>
+                  </view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,133 @@
+/* page设置 */
+page {
+  background-color: #f6f8fc; /* 极淡的灰蓝色底，很干净 */
+}
+
+/* === 1. 顶部背景：极光蓝渐变 === */
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 500rpx;
+  /* 这里修改背景色：清新蓝 -> 柔和紫 */
+  background: linear-gradient(135deg, #8EC5FC 0%, #E0C3FC 100%);
+  /* 如果喜欢更蓝一点的，可以用这个：
+  background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%); 
+  */
+  border-bottom-left-radius: 80rpx; /* 加大圆角，更圆润 */
+  border-bottom-right-radius: 80rpx;
+  z-index: 0;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  padding: 30rpx;
+  padding-top: 80rpx; /* 下移一点 */
+}
+
+/* 主卡片 */
+.main-card {
+  background: #ffffff;
+  border-radius: 40rpx; /* 大圆角 */
+  box-shadow: 0 20rpx 40rpx rgba(142, 197, 252, 0.25); /* 投影颜色跟随背景 */
+  overflow: hidden;
+  min-height: 600rpx;
+}
+
+/* 头部 */
+.card-header {
+  padding: 60rpx 40rpx 30rpx 40rpx;
+  text-align: center;
+}
+
+.course-title {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.header-meta {
+  font-size: 26rpx;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.divider { margin: 0 10rpx; color: #ddd; }
+
+
+/* 核心数据宫格 */
+.stats-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 40rpx;
+  margin: 0 30rpx;
+  background: #f9faff; /* 内部微弱的背景块 */
+  border-radius: 24rpx;
+}
+.stat-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.stat-value { font-size: 36rpx; font-weight: 800; color: #333; font-family: 'Arial Rounded MT Bold', sans-serif;}
+.stat-label { font-size: 22rpx; color: #999; margin-top: 6rpx; }
+.stat-divider { width: 1px; height: 30rpx; background: #eee; }
+
+
+/* === 详细列表样式 === */
+.detail-list {
+  padding: 40rpx;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+/* 图标容器基础样式 */
+.icon-box {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 28rpx; /* 方形圆角，像APP图标 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 30rpx;
+  flex-shrink: 0;
+  font-size: 40rpx; /* 图标字体大小 */
+  box-shadow: 0 8rpx 16rpx rgba(0,0,0,0.05);
+}
+
+/* 如果你使用 image 标签，图片样式如下 */
+.item-img-icon {
+  width: 50rpx;
+  height: 50rpx;
+}
+
+/* === 不同颜色的图标背景 === */
+/* 1. 教师 - 蓝色 */
+.icon-bg-blue {
+  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  color: #fff;
+}
+/* 2. 地点 - 绿色 */
+.icon-bg-green {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #fff;
+}
+/* 3. 类型 - 橙色 */
+.icon-bg-orange {
+  background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
+  color: #fff;
+}
+/* 4. 方式 - 紫色 */
+.icon-bg-purple {
+  background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  color: #fff;
+}
+
+.detail-content { flex: 1; }
+.detail-label { font-size: 24rpx; color: #aaa; margin-bottom: 6rpx; }
+.detail-text { font-size: 30rpx; color: #333; font-weight: 600; }
