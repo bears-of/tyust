@@ -10,10 +10,7 @@
     <view class="user-card">
       <view class="card-inner">
         <button class="user-avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-          <image src="{{userInfo.avatarUrl || '/asset/imgs/avatar.png'}}" mode="aspectFill" class="avatar-img"></image>
-          <view class="avatar-edit-icon">
-            <van-icon name="photograph" color="#fff" size="12px" />
-          </view>
+          <image src="{{userInfo.avatarUrl || '../../asset/imgs/avatar.png'}}" mode="aspectFill" class="avatar-img"></image>
         </button>
         
         <view class="user-info-box">

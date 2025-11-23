@@ -1,4 +1,6 @@
 // pages/mine/index.js
+import { updateAvatarRequest } from '../../api/main'
+
 Page({
 
   /**
@@ -28,11 +30,20 @@ Page({
    * 加载用户信息
    */
   loadUserInfo() {
+    const app = getApp()
     const token = wx.getStorageSync('token')
     const studentId = wx.getStorageSync('studentId')
     const name = wx.getStorageSync('name')
     const classInfo = wx.getStorageSync('class')
-    const avatarUrl = wx.getStorageSync('avatarUrl')
+    let avatarUrl = wx.getStorageSync('avatarUrl')
+    
+    // 如果avatarUrl是相对路径，则添加后端基础URL
+    if (avatarUrl && avatarUrl.startsWith('/static/')) {
+      const baseUrl = app.getConfig("baseUrl")
+      // 从baseUrl中提取基础URL (去掉/api部分)
+      const backendBaseUrl = baseUrl.replace('/api', '')
+      avatarUrl = backendBaseUrl + avatarUrl
+    }
 
     if (token && studentId) {
       this.setData({
@@ -58,18 +69,69 @@ Page({
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
     
-    // 保存头像到本地存储
-    wx.setStorageSync('avatarUrl', avatarUrl)
-    
-    // 更新页面显示
-    this.setData({
-      'userInfo.avatarUrl': avatarUrl
+    // 读取文件并转换为base64
+    wx.getFileSystemManager().readFile({
+      filePath: avatarUrl,
+      encoding: 'base64',
+      success: (res) => {
+        // 上传头像到后端
+        this.uploadAvatarToServer(`data:image/jpeg;base64,${res.data}`)
+      },
+      fail: (err) => {
+        console.error('读取头像文件失败:', err)
+        wx.showToast({
+          title: '读取头像失败',
+          icon: 'none'
+        })
+      }
     })
+  },
 
-    wx.showToast({
-      title: '头像已更新',
-      icon: 'success'
-    })
+  /**
+   * 上传头像到服务器
+   */
+  uploadAvatarToServer(base64Data) {
+    const updateAvatarRequest = require("../../api/main").updateAvatarRequest
+    const app = getApp()
+    
+    updateAvatarRequest({ avatarData: base64Data })
+      .then(res => {
+        if (res.code === 0) {
+          // 保存头像URL到本地存储
+          wx.setStorageSync('avatarUrl', res.data.avatarUrl)
+          
+          // 如果avatarUrl是相对路径，则添加后端基础URL用于显示
+          let displayAvatarUrl = res.data.avatarUrl
+          if (displayAvatarUrl && displayAvatarUrl.startsWith('/static/')) {
+            const baseUrl = app.getConfig("baseUrl")
+            // 从baseUrl中提取基础URL (去掉/api部分)
+            const backendBaseUrl = baseUrl.replace('/api', '')
+            displayAvatarUrl = backendBaseUrl + displayAvatarUrl
+          }
+          
+          // 更新页面显示
+          this.setData({
+            'userInfo.avatarUrl': displayAvatarUrl
+          })
+          
+          wx.showToast({
+            title: '头像已更新',
+            icon: 'success'
+          })
+        } else {
+          wx.showToast({
+            title: '头像更新失败',
+            icon: 'none'
+          })
+        }
+      })
+      .catch(err => {
+        console.error('上传头像失败:', err)
+        wx.showToast({
+          title: '网络错误',
+          icon: 'none'
+        })
+      })
   },
 
   /**

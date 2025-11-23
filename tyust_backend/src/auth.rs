@@ -124,7 +124,7 @@ pub async fn auth_middleware(
     mut request: Request,
     next: Next,
 ) -> Result<Response, (StatusCode, Json<ApiResponse<()>>)> {
-    // 从Authorization头获取token
+    // 首先尝试从Authorization头获取token（标准方式）
     let auth_header = headers
         .get("authorization")
         .and_then(|header| header.to_str().ok())
@@ -136,13 +136,19 @@ pub async fn auth_middleware(
             }
         });
 
+    // 如果没有找到Authorization头，则尝试从自定义token头获取
     let token = match auth_header {
         Some(token) => token,
         None => {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                Json(ApiResponse::error(401, "Missing authorization token".to_string())),
-            ));
+            match headers.get("token").and_then(|header| header.to_str().ok()) {
+                Some(token) => token,
+                None => {
+                    return Err((
+                        StatusCode::UNAUTHORIZED,
+                        Json(ApiResponse::error(401, "Missing authorization token".to_string())),
+                    ));
+                }
+            }
         }
     };
 

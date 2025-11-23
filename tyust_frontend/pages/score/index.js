@@ -13,6 +13,7 @@ Page({
     type: 1, // 1为有效成绩，2为原始成绩
     list: [], // 成绩列表
     termIndex: 0, // 当前学期索引
+    isUpdating: false, // <-- 新增：刷新状态
   },
 
   /**
@@ -35,17 +36,33 @@ Page({
 
   update() {
     const that = this
+    // 1. 开始刷新时，设置状态为 true
+    that.setData({
+      isUpdating: true
+    }) 
+    
     let p = null
     if (that.data.type == 1) {
       p = getScoreListRequest()
     } else {
       p = getRawScoreListRequest()
     }
+    
     p.then(res => {
       that.setData({
         list: res.data
       })
       wx.setStorageSync(that.data.type == 1 ? scoreCacheKey : rawScoreCacheKey, res.data)
+    }).finally(() => { // 无论成功失败，最后都要关闭加载状态
+      // 2. 刷新结束时，设置状态为 false
+      that.setData({
+        isUpdating: false
+      }) 
+      wx.showToast({
+        title: '成绩已更新',
+        icon: 'success',
+        duration: 1000
+      })
     })
   },
 

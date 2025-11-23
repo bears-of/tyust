@@ -14,14 +14,14 @@
     <view class="form-group">
       <view class="input-item {{stuId ? 'active' : ''}}">
         <view class="icon-wrap">
-          <image src="/asset/imgs/user.png" mode="aspectFit"></image>
+          <image src="../../asset/imgs/user.png" mode="aspectFit"></image>
         </view>
         <input type="text" model:value="{{stuId}}" placeholder="请输入学号" placeholder-class="input-placeholder"/>
       </view>
 
       <view class="input-item {{password ? 'active' : ''}}">
         <view class="icon-wrap">
-          <image src="/asset/imgs/password.png" mode="aspectFit"></image>
+          <image src="../../asset/imgs/password.png" mode="aspectFit"></image>
         </view>
         <input type="{{isPasswordVisible ? 'text' : 'password'}}" model:value="{{password}}" placeholder="请输入密码" placeholder-class="input-placeholder"/>
         

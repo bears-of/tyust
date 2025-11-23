@@ -2,7 +2,7 @@ use axum::{
     Router, middleware,
     routing::{get, post},
 };
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, services::ServeDir};
 
 mod api_types;
 mod auth;
@@ -15,9 +15,8 @@ mod tyust_api;
 mod admin_handlers;
 
 use auth::{auth_middleware, cleanup_expired_auth_cache};
-use handlers::{get_schedule, get_user_info, init_semester_config, login, logout, get_courses, get_scores, get_raw_scores, init_login, get_login_code, get_semester_config};
+use handlers::{get_schedule, get_user_info, init_semester_config, login, logout, get_courses, get_scores, get_raw_scores, init_login, get_login_code, get_semester_config, update_avatar};
 use admin_handlers::{admin_login, get_students, get_semester, set_semester, get_statistics, update_admin_password, update_admin_username, admin_auth_middleware};
-use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -55,6 +54,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/auth/logout", post(logout))
         .route("/scores", get(get_scores))
         .route("/raw-scores", get(get_raw_scores))
+        .route("/update-avatar", post(update_avatar))
         .layer(middleware::from_fn(auth_middleware));
 
     // 创建管理员路由
@@ -82,9 +82,13 @@ async fn main() -> anyhow::Result<()> {
         .merge(admin_routes)
         .merge(admin_public_routes);
 
+    // 创建静态文件服务路由
+    let static_files_service = ServeDir::new("static");
+    
     // 创建应用
     let app = Router::new()
         .nest("/api", api_routes)
+        .nest_service("/static", static_files_service)
         .layer(CorsLayer::permissive()) // 允许所有CORS请求
         .into_make_service();
 
@@ -100,6 +104,8 @@ async fn main() -> anyhow::Result<()> {
     println!("  GET  /api/courses - 获取课程列表 (需要认证)");
     println!("  GET  /api/scores - 获取有效成绩 (需要认证)");
     println!("  GET  /api/raw-scores - 获取原始成绩 (需要认证)");
+    println!("  POST /api/update-avatar - 更新用户头像 (需要认证)");
+    println!("  GET  /static/avatars/* - 用户头像文件");
     println!("");
     println!("  管理员接口:");
     println!("  POST /api/admin/login - 管理员登录");

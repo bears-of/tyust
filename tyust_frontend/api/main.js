@@ -56,3 +56,12 @@ export function getSemesterConfigRequest() {
     method: 'GET'
   })
 }
+
+// 更新用户头像
+export function updateAvatarRequest(data) {
+  return createRequest({
+    url: '/update-avatar',
+    method: 'POST',
+    data
+  })
+}

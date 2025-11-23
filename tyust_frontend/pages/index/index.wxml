@@ -10,10 +10,10 @@
   <view class="content-wrapper">
     <view class="header-area">
       <view class="greeting">
-        <view class="greet-title">Hi, 同学</view>
+        <view class="greet-title">Hi, {{userName}}</view>
         <view class="greet-sub">今天也要加油鸭 🦆</view>
       </view>
-      <image class="header-logo" src="/asset/imgs/logo.png" mode="aspectFit"></image>
+      <image class="header-logo" src="../../asset/imgs/logo.png" mode="aspectFit"></image>
     </view>
 
     <view class="nav-card">
@@ -37,7 +37,7 @@
       <view class="card-body">
         <block wx:if="{{todayCourseList.length == 0}}">
           <view class="empty-state">
-            <image class="empty-img" src="/asset/imgs/empty.png" mode="aspectFit"></image>
+            <image class="empty-img" src="../../asset/imgs/empty.png" mode="aspectFit"></image>
             <view class="empty-text">今天没有课，去图书馆充实一下吧~</view>
           </view>
         </block>

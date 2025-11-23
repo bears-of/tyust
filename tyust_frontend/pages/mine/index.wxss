@@ -70,20 +70,6 @@ page {
   border-radius: 50%;
 }
 
-.avatar-edit-icon {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #4facfe;
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2rpx solid #fff;
-}
-
 /* 文字信息部分 */
 .user-info-box {
   flex: 1;

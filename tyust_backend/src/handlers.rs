@@ -3,6 +3,10 @@ use axum::{
     extract::{Extension, Query},
     http::StatusCode,
 };
+use serde::{Deserialize, Serialize};
+use chrono::NaiveDate;
+use lazy_static::lazy_static;
+use std::sync::{Arc, Mutex};
 
 use crate::{
     api_types::{
@@ -20,15 +24,12 @@ use crate::{
     },
     entity::UserLoginInfo,
 };
-use chrono::NaiveDate;
-use lazy_static::lazy_static;
-use std::sync::{Arc, Mutex};
+use crate::tyust_api::tyust_get_user_info;
 
 // 全局学期配置存储
 lazy_static! {
     static ref SEMESTER_CONFIG: Arc<Mutex<Option<SemesterConfig>>> = Arc::new(Mutex::new(None));
 }
-use crate::tyust_api::tyust_get_user_info;
 
 /// 用户登录接口
 pub async fn login(
@@ -53,11 +54,22 @@ pub async fn login(
                 }
             };
 
+            // 先尝试从数据库获取现有用户信息（包括头像）
+            let db_pool = crate::db::get_db_pool().await;
+            let existing_user = crate::db::get_user(db_pool, &params.student_id).await.unwrap_or(None);
+            
+            let avatar_url = if let Some(user) = &existing_user {
+                user.avatar_url.clone()
+            } else {
+                None
+            };
+
             let user_info = UserLoginInfo {
                 student_id: params.student_id.clone(),
                 name: user_name,
                 class: "未知班级".to_string(), // 可以从API获取更详细信息
                 token,
+                avatar_url, // 使用数据库中的头像URL（如果存在）
             };
 
             // 存储用户会话（数据库）
@@ -232,14 +244,27 @@ fn calculate_current_week() -> Option<i32> {
     let config = semester_config.as_ref()?;
 
     let start_date = NaiveDate::parse_from_str(&config.semester_start_date, "%Y-%m-%d").ok()?;
-    let current_date = chrono::Local::now().naive_local().date();
+    let current_date = chrono::Local::now().date_naive();
 
-    let days_diff = current_date.signed_duration_since(start_date).num_days();
+    // 计算两个日期之间的天数差
+    let days_diff = (current_date - start_date).num_days();
+    
+    // 如果还未开学，返回第1周
     if days_diff < 0 {
-        return None; // 还未开学
+        return Some(1);
     }
-
-    Some((days_diff / 7) as i32 + 1)
+    
+    // 计算周数（向上取整）
+    let week = (days_diff / 7) + 1;
+    
+    // 确保周数在合理范围内（1-20周）
+    if week >= 1 && week <= 20 {
+        Some(week as i32)
+    } else if week > 20 {
+        Some(20)
+    } else {
+        Some(1)
+    }
 }
 
 /// 获取学期配置
@@ -644,4 +669,97 @@ pub async fn get_login_code(
         0x49, 0x45, 0x4E, 0x44, // IEND
         0xAE, 0x42, 0x60, 0x82, // CRC
     ]
+}
+
+/// 更新头像请求参数
+#[derive(serde::Deserialize)]
+pub struct UpdateAvatarParams {
+    #[serde(rename = "avatarData")]
+    pub avatar_data: String,
+}
+
+/// 更新用户头像
+pub async fn update_avatar(
+    Extension(student_id): Extension<String>,
+    Json(params): Json<UpdateAvatarParams>,
+) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<()>>)> {
+    use std::fs::File;
+    use std::io::Write;
+    use base64::{Engine as _, engine::general_purpose};
+    
+    let db_pool = crate::db::get_db_pool().await;
+    
+    // 获取当前用户信息
+    let mut user_info = match crate::db::get_user(db_pool, &student_id).await {
+        Ok(Some(user)) => user,
+        _ => {
+            return Err((
+                StatusCode::UNAUTHORIZED,
+                Json(ApiResponse::error(401, "User not found".to_string())),
+            ));
+        }
+    };
+    
+    // 解码base64数据
+    let base64_data = params.avatar_data.replace("data:image/jpeg;base64,", "");
+    let base64_data = base64_data.replace("data:image/png;base64,", "");
+    
+    match general_purpose::STANDARD.decode(&base64_data) {
+        Ok(image_data) => {
+            // 生成唯一的文件名
+            let filename = format!("avatar_{}.jpg", chrono::Utc::now().timestamp());
+            let file_path = format!("static/avatars/{}", filename);
+            
+            // 确保目录存在
+            std::fs::create_dir_all("static/avatars").ok();
+            
+            // 保存文件
+            match File::create(&file_path) {
+                Ok(mut file) => {
+                    if let Err(e) = file.write_all(&image_data) {
+                        eprintln!("Failed to write avatar file: {}", e);
+                        return Err((
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(ApiResponse::error(500, "Failed to save avatar file".to_string())),
+                        ));
+                    }
+                    
+                    // 构建可访问的URL
+                    let avatar_url = format!("/static/avatars/{}", filename);
+                    
+                    // 更新头像URL
+                    user_info.set_avatar_url(Some(avatar_url.clone()));
+                    
+                    // 保存到数据库
+                    if let Err(e) = crate::db::save_user(db_pool, &user_info).await {
+                        return Err((
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(ApiResponse::error(500, format!("Failed to update avatar: {}", e))),
+                        ));
+                    }
+                    
+                    // 返回新的头像URL
+                    let response_data = serde_json::json!({
+                        "avatarUrl": avatar_url
+                    });
+                    
+                    Ok(Json(ApiResponse::success(response_data)))
+                }
+                Err(e) => {
+                    eprintln!("Failed to create avatar file: {}", e);
+                    Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ApiResponse::error(500, "Failed to create avatar file".to_string())),
+                    ))
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to decode base64 avatar data: {}", e);
+            Err((
+                StatusCode::BAD_REQUEST,
+                Json(ApiResponse::error(400, "Invalid avatar data".to_string())),
+            ))
+        }
+    }
 }

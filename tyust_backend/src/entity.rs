@@ -8,6 +8,8 @@ pub struct UserLoginInfo {
     pub name: String,
     pub class: String,
     pub token: String,
+    #[serde(rename = "avatarUrl")]
+    pub avatar_url: Option<String>, // 头像URL
 }
 
 impl UserLoginInfo {
@@ -18,7 +20,13 @@ impl UserLoginInfo {
             name,
             class,
             token,
+            avatar_url: None,
         }
+    }
+    
+    /// 设置头像URL
+    pub fn set_avatar_url(&mut self, avatar_url: Option<String>) {
+        self.avatar_url = avatar_url;
     }
 }
 

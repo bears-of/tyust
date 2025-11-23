@@ -149,6 +149,9 @@ Page({
           startDate: startDate
         })
         
+        // 保存学期配置到本地存储
+        wx.setStorageSync('semesterConfig', res.data)
+        
         // 计算当前周次
         const currentWeek = this.calculateCurrentWeek(startDate)
         this.setData({

@@ -114,7 +114,7 @@ pub async fn get_students(
     let db_pool = db::get_db_pool().await;
     
     // 查询所有用户
-    let users = sqlx::query("SELECT student_id, name, class, token FROM users")
+    let users = sqlx::query("SELECT student_id, name, class, token, avatar_url FROM users")
         .fetch_all(db_pool)
         .await
         .map_err(|e| {
@@ -132,6 +132,7 @@ pub async fn get_students(
             name: row.get::<&str, _>(1).to_string(),
             class: row.get::<Option<&str>, _>(2).map(|s| s.to_string()).unwrap_or_default(),
             token: row.get::<Option<&str>, _>(3).map(|s| s.to_string()).unwrap_or_default(),
+            avatar_url: row.get::<Option<&str>, _>(4).map(|s| s.to_string()), // 添加头像URL字段
         })
         .collect();
     

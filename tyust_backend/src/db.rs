@@ -22,19 +22,25 @@ pub async fn get_db_pool() -> &'static PgPool {
 
 /// 初始化数据库表
 pub async fn init_tables(pool: &PgPool) -> Result<(), sqlx::Error> {
-    // 创建用户表
+    // 创建用户表（添加avatar_url字段）
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS users (
             student_id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             class TEXT,
             token TEXT,
+            avatar_url TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )"
     )
     .execute(pool)
     .await?;
+    
+    // 如果表已存在但没有avatar_url字段，则添加该字段
+    let _ = sqlx::query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT")
+        .execute(pool)
+        .await;
     
     // 创建用户认证缓存表
     sqlx::query(
@@ -97,7 +103,7 @@ pub async fn init_tables(pool: &PgPool) -> Result<(), sqlx::Error> {
         .unwrap_or_else(|_| "admin123".to_string());
     
     // 对密码进行哈希处理
-    let hashed_password = hash(&default_password, DEFAULT_COST)
+    let hashed_password = bcrypt::hash(&default_password, bcrypt::DEFAULT_COST)
         .map_err(|e| sqlx::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
     
     let _ = sqlx::query(
@@ -113,18 +119,19 @@ pub async fn init_tables(pool: &PgPool) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-/// 保存用户信息
+/// 保存用户信息（包括头像URL）
 pub async fn save_user(pool: &PgPool, user: &UserLoginInfo) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "INSERT INTO users (student_id, name, class, token, updated_at) 
-         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+        "INSERT INTO users (student_id, name, class, token, avatar_url, updated_at) 
+         VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
          ON CONFLICT (student_id) 
-         DO UPDATE SET name = EXCLUDED.name, class = EXCLUDED.class, token = EXCLUDED.token, updated_at = CURRENT_TIMESTAMP"
+         DO UPDATE SET name = EXCLUDED.name, class = EXCLUDED.class, token = EXCLUDED.token, avatar_url = EXCLUDED.avatar_url, updated_at = CURRENT_TIMESTAMP"
     )
     .bind(&user.student_id)
     .bind(&user.name)
     .bind(&user.class)
     .bind(&user.token)
+    .bind(&user.avatar_url)
     .execute(pool)
     .await?;
     
@@ -134,7 +141,7 @@ pub async fn save_user(pool: &PgPool, user: &UserLoginInfo) -> Result<(), sqlx::
 /// 获取用户信息
 pub async fn get_user(pool: &PgPool, student_id: &str) -> Result<Option<UserLoginInfo>, sqlx::Error> {
     let row = sqlx::query(
-        "SELECT student_id, name, class, token FROM users WHERE student_id = $1"
+        "SELECT student_id, name, class, token, avatar_url FROM users WHERE student_id = $1"
     )
     .bind(student_id)
     .fetch_optional(pool)
@@ -146,6 +153,7 @@ pub async fn get_user(pool: &PgPool, student_id: &str) -> Result<Option<UserLogi
             name: row.get(1),
             class: row.get(2),
             token: row.get(3),
+            avatar_url: row.get(4),
         }))
     } else {
         Ok(None)

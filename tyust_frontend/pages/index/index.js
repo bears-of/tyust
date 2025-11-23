@@ -14,15 +14,22 @@ Page({
     totalWeek: 20,
     todayCourseList: [],
     todayWeek: 1,
-    todayWeeks: 1
+    todayWeeks: 1,
+    userName: '同学' // 默认值
   },
 
   onLoad() {
     // 可以在这里加个加载动画，显得更高级
     wx.showLoading({ title: '加载中...', mask: true })
     
-    // 模拟延迟，或者直接加载
-    this.getTodayCourseList();
+    // 获取用户姓名
+    const userName = wx.getStorageSync('name') || '同学'
+    this.setData({
+      userName: userName
+    })
+    
+    // 立即刷新今日课程数据
+    this.refreshTodayCourseList();
     
     setTimeout(() => {
         wx.hideLoading();
@@ -43,14 +50,68 @@ Page({
     })
   },
 
+  // 刷新今日课程数据
+  refreshTodayCourseList() {
+    const that = this;
+    
+    // 引入课程数据请求函数
+    const getCourseListRequest = require('../../api/main').getCourseListRequest;
+    const getSemesterConfigRequest = require('../../api/main').getSemesterConfigRequest;
+    
+    // 先获取最新的学期配置
+    getSemesterConfigRequest().then(configRes => {
+      if (configRes.code === 0 && configRes.data) {
+        // 更新本地存储的学期配置
+        wx.setStorageSync('semesterConfig', configRes.data);
+        
+        // 获取最新的课程数据
+        getCourseListRequest().then(courseRes => {
+          if (courseRes.code === 0) {
+            // 更新本地存储的课程数据
+            wx.setStorageSync('courses', courseRes.data);
+            
+            // 更新今日课程列表
+            that.getTodayCourseList();
+          } else {
+            // 如果获取失败，仍然使用本地缓存的数据
+            that.getTodayCourseList();
+          }
+        }).catch(err => {
+          console.error('获取课程数据失败:', err);
+          // 如果请求失败，仍然使用本地缓存的数据
+          that.getTodayCourseList();
+        });
+      } else {
+        // 如果获取学期配置失败，仍然使用本地缓存的数据
+        that.getTodayCourseList();
+      }
+    }).catch(err => {
+      console.error('获取学期配置失败:', err);
+      // 如果请求失败，仍然使用本地缓存的数据
+      that.getTodayCourseList();
+    });
+  },
+
   getTodayCourseList() {
-    const todayWeek = new Date().getDay()
-    const todayWeeks = getNowWeek(this.data.startDate, this.data.totalWeek)
+    // 从本地存储获取学期配置
+    const semesterConfig = wx.getStorageSync('semesterConfig')
+    let startDate = this.data.startDate
+    let totalWeek = this.data.totalWeek
+    
+    if (semesterConfig && semesterConfig.semester_start_date) {
+      // 将 YYYY-MM-DD 格式转换为 YYYY/MM/DD 格式
+      startDate = semesterConfig.semester_start_date.replace(/-/g, '/')
+      totalWeek = 20 // 默认20周
+    }
+    
+    const todayWeek = new Date().getDay() // 周日为0，周一为1，...，周六为6
+    const todayWeeks = getNowWeek(startDate, totalWeek)
     const courseList = wx.getStorageSync('courses') || [] // 防止空数组报错
     
     const todayCourseList = courseList.filter(item => {
       // 兼容处理：如果 item.weeks 是字符串需要注意转换，这里假设是数组
-      return item.week == todayWeek && (item.weeks && item.weeks.indexOf(todayWeeks) > -1)
+      // 确保今天的课程在当前周次内
+      return item.week == (todayWeek === 0 ? 7 : todayWeek) && (item.weeks && item.weeks.includes(todayWeeks))
     })
     
     todayCourseList.sort((a, b) => {
@@ -58,7 +119,7 @@ Page({
     })
 
     this.setData({
-      todayWeek: todayWeek === 0 ? 7 : todayWeek, // 处理周日为0的情况
+      todayWeek,
       todayWeeks,
       todayCourseList
     })
