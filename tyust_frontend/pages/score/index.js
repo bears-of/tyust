@@ -1,4 +1,6 @@
 import { getScoreListRequest, getRawScoreListRequest } from "../../api/main";
+const auth = require("../../utils/auth");
+const pageAuth = require("../../utils/pageAuth");
 const scoreCacheKey = "scores";
 const rawScoreCacheKey = "rawScores";
 Page({
@@ -16,6 +18,10 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    // 检查登录状态
+    if (!pageAuth.checkAuth()) {
+      return;
+    }
     this.getList();
   },
 
@@ -99,6 +105,12 @@ Page({
 
   update() {
     const that = this;
+
+    // 检查登录状态
+    if (!auth.checkLogin()) {
+      return;
+    }
+
     // 1. 开始刷新时，设置状态为 true
     that.setData({
       isUpdating: true,

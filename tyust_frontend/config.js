@@ -10,7 +10,7 @@ if (envVersion === "release" && env !== "production") {
 export default {
   env,
   baseUrl: {
-    develop: 'http://localhost:3000/api', 
+    develop: 'http://192.168.0.233:3000/api', 
     production: 'http://api.xxx.com',
   }
 }

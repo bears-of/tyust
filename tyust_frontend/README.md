@@ -17,5 +17,44 @@ UI设计稿地址：[https://mastergo.com/goto/rpCIDmXp](https://mastergo.com/go
 - [3.封装请求函数](/articles/3.封装请求函数.md)
 - [4.环境变量配置.md](/articles/4.环境变量配置.md)
 
+## ✨ 新功能：Token 验证和自动登录
+
+已实现完整的 Token 验证和自动重新登录功能，提供更好的用户体验：
+
+- ✅ Token 失效自动检测
+- ✅ 自动清除过期认证信息
+- ✅ 友好的提示信息
+- ✅ 自动跳转到登录页
+- ✅ 保留用户账号密码
+- ✅ 防止重复跳转
+
+### 📚 相关文档
+
+| 文档 | 说明 | 推荐阅读 |
+|------|------|---------|
+| [TOKEN_QUICK_START.md](./TOKEN_QUICK_START.md) | 5分钟快速开始 | ⭐⭐⭐⭐⭐ |
+| [TOKEN_AUTH_README.md](./TOKEN_AUTH_README.md) | 功能概览说明 | ⭐⭐⭐⭐⭐ |
+| [TOKEN_AUTH_GUIDE.md](./TOKEN_AUTH_GUIDE.md) | 详细使用指南 | ⭐⭐⭐⭐ |
+| [TOKEN_TEST_GUIDE.md](./TOKEN_TEST_GUIDE.md) | 测试指南 | ⭐⭐⭐ |
+| [TOKEN_IMPLEMENTATION_SUMMARY.md](./TOKEN_IMPLEMENTATION_SUMMARY.md) | 实现总结 | ⭐⭐⭐ |
+| [CHECKLIST.md](./CHECKLIST.md) | 上线检查清单 | ⭐⭐⭐⭐⭐ |
+
+### 🚀 快速使用
+
+```javascript
+// 需要登录的页面
+const pageAuth = require('../../utils/pageAuth')
+
+Page({
+  onLoad(options) {
+    if (!pageAuth.checkAuth()) return
+    this.loadData()
+  }
+})
+```
+
+更多使用方法请查看 [TOKEN_QUICK_START.md](./TOKEN_QUICK_START.md)
+
+---
 
 课程未完结，还在持续更新中...
