@@ -1,4 +1,5 @@
 use crate::de_crypto;
+use crate::de_crypto::get_crypto_and_password;
 use crate::entity::{self, RonghemenhuUserInfoResponse, TyustCourseResponse, TyustScoreResponse};
 use crate::http_helper::{
     build_cookie_header, extract_query_param, get_cookie_value, header_str, new_client_follow,
@@ -9,6 +10,7 @@ use once_cell::sync::Lazy;
 use rand::RngCore;
 use regex::Regex;
 use reqwest::header::{COOKIE, HeaderMap, HeaderValue, LOCATION, REFERER, SET_COOKIE, USER_AGENT};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 use url::Url;
@@ -367,36 +369,39 @@ pub async fn tyust_get_scores(
 /// 获取原始成绩
 pub async fn tyust_get_raw_scores(
     jwglxt_jsession: &str,
-    access_token: &str,
     route: &str,
+    xh_id: &str,
+    xnm: &str,
+    xqm: &str,
 ) -> Result<Vec<entity::ScoreItem>> {
     let mut headers = HeaderMap::new();
     let mut cookies = HashMap::new();
-    cookies.insert("__access_token".into(), access_token.into());
     cookies.insert("JSESSIONID".into(), jwglxt_jsession.into());
     cookies.insert("route".into(), route.into());
     headers.insert(COOKIE, build_cookie_header(&cookies)?);
     headers.insert(
         USER_AGENT,
-        HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/115.0"),
+        HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0"),
     );
-    headers.insert(REFERER, HeaderValue::from_static("https://newjwc.tyust.edu.cn/jwglxt/cjcx/cjcx_cxXsYscj.html?gnmkdm=N305007&layout=default"));
+    headers.insert(REFERER, HeaderValue::from_static("https://newjwc.tyust.edu.cn/jwglxt/xsxxxggl/xsgrxxwh_cxXsgrxx.html?gnmkdm=N100801&layout=default"));
 
-    let params = [("gnmkdm", "N305007")];
+    let params = [("gnmkdm", "N305005"), ("doType", "query")];
+    let timestamp = chrono::Utc::now().timestamp_millis().to_string();
     let form = [
-        ("xnm", ""),
-        ("xqm", ""),
+        ("xh_id", xh_id),
+        ("xnm", xnm),
+        ("xqm", xqm),
         ("_search", "false"),
-        ("nd", &chrono::Utc::now().timestamp_millis().to_string()),
+        ("nd", &timestamp),
         ("queryModel.showCount", "5000"),
         ("queryModel.currentPage", "1"),
-        ("queryModel.sortName", ""),
+        ("queryModel.sortName", " "),
         ("queryModel.sortOrder", "asc"),
-        ("time", "1"),
+        ("time", "0"),
     ];
 
     let resp = CLIENT_NO_REDIRECT
-        .post("https://newjwc.tyust.edu.cn/jwglxt/cjcx/cjcx_cxXsYscj.html")
+        .post("https://newjwc.tyust.edu.cn/jwglxt/cjcx/cjcx_cxDgXscj.html")
         .headers(headers)
         .query(&params)
         .form(&form)
@@ -406,4 +411,103 @@ pub async fn tyust_get_raw_scores(
 
     let score_response = resp.json::<TyustScoreResponse>().await?;
     Ok(score_response.items)
+}
+
+/// 成绩解析结果
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ParsedScores {
+    pub student_name: String,       // 学生姓名
+    pub academic_year: String,      // 学年
+    pub semester: String,           // 学期
+    pub subjects: Vec<SubjectInfo>, // 科目列表
+}
+
+/// 科目信息
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SubjectInfo {
+    pub course_name: String,      // 课程名称
+    pub course_type: String,      // 课程类别
+    pub score: String,            // 成绩
+    pub percentage_score: String, // 百分制成绩
+    pub grade_point: String,      // 绩点
+    pub credit: String,           // 学分
+    pub teacher: String,          // 任课教师
+    pub department: String,       // 开课部门
+}
+
+/// 解析成绩数据
+///
+/// 从成绩列表中提取学生和学期信息，并转换为结构化的科目信息
+///
+/// # 参数
+/// * `items` - 成绩项列表
+///
+/// # 返回
+/// * `Ok(ParsedScores)` - 解析后的成绩数据，包含学生信息和科目列表
+/// * `Err` - 如果成绩数据为空
+///
+/// # 示例
+/// ```no_run
+/// use tyust_backend::tyust_api;
+/// use tyust_backend::entity;
+///
+/// async fn example() -> anyhow::Result<()> {
+///     // 获取成绩数据
+///     let jsession = "your_jsession";
+///     let access_token = "your_access_token";
+///     let route = "your_route";
+///
+///     let scores = tyust_api::tyust_get_scores(jsession, access_token, route).await?;
+///
+///     // 解析成绩
+///     let parsed = tyust_api::parse_scores(scores)?;
+///
+///     println!("学生: {} ({} 学年 第{}学期)",
+///         parsed.student_name,
+///         parsed.academic_year,
+///         parsed.semester
+///     );
+///
+///     for (i, subject) in parsed.subjects.iter().enumerate() {
+///         println!("科目 {}: {}", i + 1, subject.course_name);
+///         println!("  成绩: {}", subject.score);
+///         println!("  绩点: {}", subject.grade_point);
+///         println!("  学分: {}", subject.credit);
+///     }
+///
+///     Ok(())
+/// }
+/// ```
+pub fn parse_scores(items: Vec<entity::ScoreItem>) -> Result<ParsedScores> {
+    if items.is_empty() {
+        return Err(anyhow!("成绩数据为空"));
+    }
+
+    // 从第一个科目获取学生和学期信息
+    let first_item = &items[0];
+    let student_name = first_item.xm.clone();
+    let academic_year = first_item.xnmmc.clone();
+    let semester = first_item.xqmmc.clone();
+
+    // 转换所有科目信息
+    let subjects: Vec<SubjectInfo> = items
+        .into_iter()
+        .map(|subject| SubjectInfo {
+            course_name: subject.kcmc,
+            course_type: subject.kclbmc,
+            score: subject.cj,
+            percentage_score: subject.bfzcj,
+            grade_point: subject.jd,
+            credit: subject.xf,
+            teacher: subject.jsxm,
+            department: subject.kkbmmc,
+        })
+        .collect();
+
+    Ok(ParsedScores {
+        student_name,
+        academic_year,
+        semester,
+        subjects,
+    })
 }

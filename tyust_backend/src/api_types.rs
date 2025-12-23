@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::entity::{Kb, ScoreItem};
+use serde::{Deserialize, Serialize};
 
 // 重新导出FullUserInfo作为UserInfo以保持API兼容性
 pub use crate::entity::UserLoginInfo as UserInfo;
@@ -73,7 +73,7 @@ pub struct Course {
     pub teacher: String,
     pub classroom: String,
     pub time: String,
-    pub week: i32, // 星期几 (1-7)
+    pub week: i32,    // 星期几 (1-7)
     pub section: i32, // 开始节次
     #[serde(rename = "sectionCount")]
     pub section_count: i32, // 持续节次数
@@ -83,20 +83,20 @@ pub struct Course {
     pub raw_weeks: String, // 原始周次字符串，如 "1-16周"
     #[serde(rename = "rawSection")]
     pub raw_section: String, // 原始节次字符串，如 "一 1-2"
-    pub address: String, // 上课地点（教室）
-    pub credit: String, // 学分
+    pub address: String,  // 上课地点（教室）
+    pub credit: String,   // 学分
     pub category: String, // 课程类别
-    pub method: String, // 考核方式
+    pub method: String,   // 考核方式
 }
 
 impl From<Kb> for Course {
     fn from(kb: Kb) -> Self {
         // 解析星期几 (1-7)
         let week = kb.xqj.parse::<i32>().unwrap_or(1);
-        
+
         // 解析节次信息，如 "1-2" -> section=1, section_count=2
         let (section, section_count) = parse_section(&kb.jc);
-        
+
         // 解析周次范围，如 "1-16周" -> [1,2,3,...,16]
         let weeks = parse_weeks_range(&kb.zcd);
 
@@ -138,20 +138,20 @@ fn parse_section(jc: &str) -> (i32, i32) {
 /// 解析周次范围字符串，如 "1-16周" -> [1,2,3,...,16]
 fn parse_weeks_range(zcd: &str) -> Vec<i32> {
     let clean_str = zcd.replace('周', "");
-    
+
     // 处理单周/双周的情况，如 "1-16周(单)"
     let base_str = if clean_str.contains('(') {
         clean_str.split('(').next().unwrap_or(&clean_str)
     } else {
         &clean_str
     };
-    
+
     let is_odd = clean_str.contains("单");
     let is_even = clean_str.contains("双");
-    
+
     // 处理逗号分隔的情况，如 "1,3,5-8周"
     let mut all_weeks = Vec::new();
-    
+
     for part in base_str.split(',') {
         if part.contains('-') {
             let range_parts: Vec<&str> = part.split('-').collect();
@@ -179,7 +179,7 @@ fn parse_weeks_range(zcd: &str) -> Vec<i32> {
             }
         }
     }
-    
+
     all_weeks.sort();
     all_weeks
 }
@@ -190,17 +190,25 @@ pub struct ScheduleParams {
     pub week: Option<i32>,
 }
 
+/// 获取原始成绩请求参数
+#[derive(Debug, Deserialize)]
+pub struct RawScoresParams {
+    pub xh_id: Option<String>, // 学号ID
+    pub xnm: Option<String>,   // 学年码
+    pub xqm: Option<String>,   // 学期码
+}
+
 /// 开学时间配置
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SemesterConfig {
     pub semester_start_date: String, // 开学日期，格式: "2024-02-26"
-    pub semester_name: String, // 学期名称，如"2023-2024学年第二学期"
+    pub semester_name: String,       // 学期名称，如"2023-2024学年第二学期"
 }
 
 /// 设置开学时间的请求参数
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SetSemesterStartRequest {
-    pub start_date: String, // 开学日期，格式: "2024-02-26"
+    pub start_date: String,    // 开学日期，格式: "2024-02-26"
     pub semester_name: String, // 学期名称
 }
 
@@ -215,10 +223,10 @@ pub struct Claims {
 /// 管理员 JWT Claims
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AdminClaims {
-    pub sub: String, // 管理员ID
+    pub sub: String,      // 管理员ID
     pub username: String, // 管理员用户名
-    pub exp: usize,  // 过期时间
-    pub iat: usize,  // 签发时间
+    pub exp: usize,       // 过期时间
+    pub iat: usize,       // 签发时间
 }
 
 /// 成绩信息（API响应格式）

@@ -7,8 +7,10 @@ use url::Url;
 /// 创建不跟随重定向的HTTP客户端
 pub fn new_client_no_redirect() -> Result<Client> {
     Client::builder()
-        .timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(8))  // 减少超时时间
+        .connect_timeout(Duration::from_secs(5))  // 添加连接超时
         .redirect(reqwest::redirect::Policy::none())
+        .pool_max_idle_per_host(4)  // 限制连接池大小
         .build()
         .map_err(Into::into)
 }
@@ -16,7 +18,9 @@ pub fn new_client_no_redirect() -> Result<Client> {
 /// 创建跟随重定向的HTTP客户端
 pub fn new_client_follow() -> Result<Client> {
     Client::builder()
-        .timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(8))  // 减少超时时间
+        .connect_timeout(Duration::from_secs(5))  // 添加连接超时
+        .pool_max_idle_per_host(4)  // 限制连接池大小
         .build()
         .map_err(Into::into)
 }

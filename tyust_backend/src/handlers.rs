@@ -3,28 +3,26 @@ use axum::{
     extract::{Extension, Query},
     http::StatusCode,
 };
-use serde::{Deserialize, Serialize};
 use chrono::NaiveDate;
 use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
+use crate::tyust_api::tyust_get_user_info;
 use crate::{
     api_types::{
         ApiResponse, Course, LoginParams, ScheduleParams, Score, SemesterConfig,
         SetSemesterStartRequest, UserInfo,
     },
-    auth::{
-        UserAuthCache, generate_token,
-    },
+    auth::{UserAuthCache, generate_token},
     de_crypto::get_crypto_and_password,
+    entity::UserLoginInfo,
     tyust_api::{
         tyust_get_access_token, tyust_get_current_course, tyust_get_jwglxt_jsession,
         tyust_get_login_code, tyust_get_raw_scores, tyust_get_ronghemenhu_jsessionid,
         tyust_get_route, tyust_get_scores, tyust_get_session,
     },
-    entity::UserLoginInfo,
 };
-use crate::tyust_api::tyust_get_user_info;
 
 // 全局学期配置存储
 lazy_static! {
@@ -56,8 +54,10 @@ pub async fn login(
 
             // 先尝试从数据库获取现有用户信息（包括头像）
             let db_pool = crate::db::get_db_pool().await;
-            let existing_user = crate::db::get_user(db_pool, &params.student_id).await.unwrap_or(None);
-            
+            let existing_user = crate::db::get_user(db_pool, &params.student_id)
+                .await
+                .unwrap_or(None);
+
             let avatar_url = if let Some(user) = &existing_user {
                 user.avatar_url.clone()
             } else {
@@ -146,7 +146,7 @@ pub async fn logout(Extension(student_id): Extension<String>) -> Json<ApiRespons
     let db_pool = crate::db::get_db_pool().await;
     let _ = crate::db::delete_user(db_pool, &student_id).await;
     let _ = crate::db::delete_auth_cache(db_pool, &student_id).await;
-    
+
     Json(ApiResponse::success(()))
 }
 
@@ -216,22 +216,20 @@ pub async fn get_semester_start()
 /// 从数据库初始化学期配置
 pub async fn init_semester_config() -> Result<(), String> {
     let db_pool = crate::db::get_db_pool().await;
-    
+
     // 从数据库获取当前激活的学期配置
     let config = crate::db::get_active_semester_config(db_pool)
         .await
         .map_err(|e| format!("Failed to fetch semester config from database: {}", e))?;
-    
+
     match config {
-        Some(config) => {
-            match SEMESTER_CONFIG.lock() {
-                Ok(mut semester_config) => {
-                    *semester_config = Some(config);
-                    Ok(())
-                }
-                Err(_) => Err("Failed to initialize semester config".to_string()),
+        Some(config) => match SEMESTER_CONFIG.lock() {
+            Ok(mut semester_config) => {
+                *semester_config = Some(config);
+                Ok(())
             }
-        }
+            Err(_) => Err("Failed to initialize semester config".to_string()),
+        },
         None => {
             Err("No semester configuration found in database. Please set it via API.".to_string())
         }
@@ -248,15 +246,15 @@ fn calculate_current_week() -> Option<i32> {
 
     // 计算两个日期之间的天数差
     let days_diff = (current_date - start_date).num_days();
-    
+
     // 如果还未开学，返回第1周
     if days_diff < 0 {
         return Some(1);
     }
-    
+
     // 计算周数（向上取整）
     let week = (days_diff / 7) + 1;
-    
+
     // 确保周数在合理范围内（1-20周）
     if week >= 1 && week <= 20 {
         Some(week as i32)
@@ -268,8 +266,9 @@ fn calculate_current_week() -> Option<i32> {
 }
 
 /// 获取学期配置
-pub async fn get_semester_config(
-) -> Result<Json<ApiResponse<crate::api_types::SemesterConfig>>, (StatusCode, Json<ApiResponse<()>>)> {
+pub async fn get_semester_config()
+-> Result<Json<ApiResponse<crate::api_types::SemesterConfig>>, (StatusCode, Json<ApiResponse<()>>)>
+{
     match SEMESTER_CONFIG.lock() {
         Ok(semester_config) => match semester_config.as_ref() {
             Some(config) => Ok(Json(ApiResponse::success(config.clone()))),
@@ -311,11 +310,18 @@ async fn authenticate_user(student_id: &str, password: &str) -> Result<String, S
     .await
     .map_err(|e| format!("Login error: {}", e))?;
 
-    // 获取access_token和route
-    let access_token = tyust_get_access_token(&session, &sourceid_tgc, &rg_objectid)
-        .await
-        .map_err(|e| format!("Access token error: {}", e))?;
+    // 并行执行可以并行的API调用
+    let (access_token_result, ronghemenhu_jsession_result) = tokio::join!(
+        tyust_get_access_token(&session, &sourceid_tgc, &rg_objectid),
+        tyust_get_ronghemenhu_jsessionid(&code)
+    );
 
+    let access_token = access_token_result.map_err(|e| format!("Access token error: {}", e))?;
+
+    let ronghemenhu_jsession =
+        ronghemenhu_jsession_result.map_err(|e| format!("Ronghemenhu JSESSION error: {}", e))?;
+
+    // 继续执行依赖于access_token的API调用
     let route = tyust_get_route(&access_token)
         .await
         .map_err(|e| format!("Route error: {}", e))?;
@@ -325,11 +331,6 @@ async fn authenticate_user(student_id: &str, password: &str) -> Result<String, S
             .await
             .map_err(|e| format!("JSESSION error: {}", e))?;
 
-    let ronghemenhu_jsession = tyust_get_ronghemenhu_jsessionid(&code)
-        .await
-        .map_err(|e| format!("Ronghemenhu JSESSION error: {}", e))?;
-
-    // todo!('这里的clone可以去掉');
     // 创建用户认证缓存
     let auth_cache = UserAuthCache {
         sourceid_tgc: sourceid_tgc.clone(),
@@ -342,12 +343,7 @@ async fn authenticate_user(student_id: &str, password: &str) -> Result<String, S
         cached_at: chrono::Utc::now(),
     };
 
-    // 存储用户认证缓存（数据库）
-    let db_pool = crate::db::get_db_pool().await;
-    if let Err(e) = crate::db::save_auth_cache(db_pool, student_id, &auth_cache).await {
-    }
-    
-    // 持久化到数据库
+    // 只执行一次数据库保存操作
     let db_pool = crate::db::get_db_pool().await;
     if let Err(e) = crate::db::save_auth_cache(db_pool, student_id, &auth_cache).await {
         eprintln!("Failed to save auth cache to database: {}", e);
@@ -562,6 +558,7 @@ pub async fn get_scores(
 /// 获取原始成绩接口
 pub async fn get_raw_scores(
     Extension(student_id): Extension<String>,
+    Query(params): Query<crate::api_types::RawScoresParams>,
 ) -> Result<Json<ApiResponse<Vec<Score>>>, (StatusCode, Json<ApiResponse<()>>)> {
     // 从数据库中获取用户信息
     let db_pool = crate::db::get_db_pool().await;
@@ -605,10 +602,17 @@ pub async fn get_raw_scores(
     }
 
     // 使用缓存的认证信息获取原始成绩数据
+    // 使用查询参数或默认为学号和空字符串
+    let xh_id = params.xh_id.as_deref().unwrap_or(&student_id);
+    let xnm = params.xnm.as_deref().unwrap_or("");
+    let xqm = params.xqm.as_deref().unwrap_or("");
+
     match tyust_get_raw_scores(
         &auth_cache.jwglxt_jsession,
-        &auth_cache.access_token,
         &auth_cache.route,
+        xh_id,
+        xnm,
+        xqm,
     )
     .await
     {
@@ -683,12 +687,12 @@ pub async fn update_avatar(
     Extension(student_id): Extension<String>,
     Json(params): Json<UpdateAvatarParams>,
 ) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<()>>)> {
+    use base64::{Engine as _, engine::general_purpose};
     use std::fs::File;
     use std::io::Write;
-    use base64::{Engine as _, engine::general_purpose};
-    
+
     let db_pool = crate::db::get_db_pool().await;
-    
+
     // 获取当前用户信息
     let mut user_info = match crate::db::get_user(db_pool, &student_id).await {
         Ok(Some(user)) => user,
@@ -699,20 +703,20 @@ pub async fn update_avatar(
             ));
         }
     };
-    
+
     // 解码base64数据
     let base64_data = params.avatar_data.replace("data:image/jpeg;base64,", "");
     let base64_data = base64_data.replace("data:image/png;base64,", "");
-    
+
     match general_purpose::STANDARD.decode(&base64_data) {
         Ok(image_data) => {
             // 生成唯一的文件名
             let filename = format!("avatar_{}.jpg", chrono::Utc::now().timestamp());
             let file_path = format!("static/avatars/{}", filename);
-            
+
             // 确保目录存在
             std::fs::create_dir_all("static/avatars").ok();
-            
+
             // 保存文件
             match File::create(&file_path) {
                 Ok(mut file) => {
@@ -720,36 +724,45 @@ pub async fn update_avatar(
                         eprintln!("Failed to write avatar file: {}", e);
                         return Err((
                             StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ApiResponse::error(500, "Failed to save avatar file".to_string())),
+                            Json(ApiResponse::error(
+                                500,
+                                "Failed to save avatar file".to_string(),
+                            )),
                         ));
                     }
-                    
+
                     // 构建可访问的URL
                     let avatar_url = format!("/static/avatars/{}", filename);
-                    
+
                     // 更新头像URL
                     user_info.set_avatar_url(Some(avatar_url.clone()));
-                    
+
                     // 保存到数据库
                     if let Err(e) = crate::db::save_user(db_pool, &user_info).await {
                         return Err((
                             StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ApiResponse::error(500, format!("Failed to update avatar: {}", e))),
+                            Json(ApiResponse::error(
+                                500,
+                                format!("Failed to update avatar: {}", e),
+                            )),
                         ));
                     }
-                    
+
                     // 返回新的头像URL
                     let response_data = serde_json::json!({
                         "avatarUrl": avatar_url
                     });
-                    
+
                     Ok(Json(ApiResponse::success(response_data)))
                 }
                 Err(e) => {
                     eprintln!("Failed to create avatar file: {}", e);
                     Err((
                         StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(ApiResponse::error(500, "Failed to create avatar file".to_string())),
+                        Json(ApiResponse::error(
+                            500,
+                            "Failed to create avatar file".to_string(),
+                        )),
                     ))
                 }
             }
