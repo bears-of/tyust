@@ -188,6 +188,10 @@ page {
   background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
 }
 
+.purple-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 .grid-text {
   font-size: 28rpx;
   font-weight: 500;

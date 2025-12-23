@@ -1,0 +1,420 @@
+/* GPA 计算器页面样式 */
+page {
+  background-color: #f5f7fa;
+}
+
+.container {
+  padding: 20rpx;
+  padding-bottom: 40rpx;
+}
+
+/* === 顶部操作栏 === */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.header-left {
+  flex: 1;
+}
+
+.standard-picker {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 500;
+}
+
+.standard-picker text:last-child {
+  margin-left: 8rpx;
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.header-right {
+  display: flex;
+  gap: 16rpx;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 20rpx;
+  background: #f0f0f0;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.action-btn text:first-child {
+  font-size: 28rpx;
+  margin-right: 6rpx;
+}
+
+/* === GPA 结果卡片 === */
+.result-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eaed 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.result-main {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.gpa-value {
+  font-size: 96rpx;
+  font-weight: 700;
+  color: #333333;
+  line-height: 1.2;
+  text-shadow: none;
+}
+
+.gpa-label {
+  font-size: 28rpx;
+  color: #666666;
+  margin-top: 8rpx;
+}
+
+.result-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+}
+
+.detail-item {
+  text-align: center;
+  flex: 1;
+}
+
+.detail-value {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.detail-label {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.detail-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* === 课程列表 === */
+.course-list {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.list-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  background: #333333;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  color: #ffffff;
+  font-weight: 500;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.add-btn text:first-child {
+  font-size: 30rpx;
+  margin-right: 6rpx;
+}
+
+.courses {
+  margin-top: 20rpx;
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #f5f5f5;
+}
+
+.course-item:last-child {
+  border-bottom: none;
+}
+
+.course-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.course-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.course-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333333;
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.course-score {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+.course-details {
+  display: flex;
+  gap: 24rpx;
+}
+
+.detail-text {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.course-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.action-icon {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  color: #666666;
+}
+
+.action-icon.delete {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* === 空列表 === */
+.empty-list {
+  text-align: center;
+  padding: 80rpx 0;
+}
+
+.empty-list text:first-child {
+  display: block;
+  font-size: 120rpx;
+  color: #e0e0e0;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  display: block;
+  font-size: 28rpx;
+  color: #999999;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  display: block;
+  font-size: 24rpx;
+  color: #cccccc;
+}
+
+/* === GPA 说明 === */
+.gpa-info {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 20rpx;
+}
+
+.info-title text:first-child {
+  font-size: 32rpx;
+  color: #666666;
+  margin-right: 8rpx;
+}
+
+.info-content {
+  font-size: 26rpx;
+  color: #666666;
+  line-height: 1.8;
+}
+
+.info-section {
+  margin-bottom: 16rpx;
+}
+
+.info-section:last-child {
+  margin-bottom: 0;
+}
+
+.info-subtitle {
+  display: block;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.info-text {
+  display: block;
+  color: #666666;
+}
+
+/* === 弹窗样式 === */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-container {
+  width: 600rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  animation: modal-show 0.3s ease-out;
+}
+
+@keyframes modal-show {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+.modal-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #999999;
+}
+
+.modal-body {
+  padding: 30rpx;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  color: #333333;
+}
+
+.modal-footer {
+  display: flex;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.modal-btn.cancel {
+  color: #999999;
+  border-right: 2rpx solid #f0f0f0;
+}
+
+.modal-btn.confirm {
+  color: #333333;
+  font-weight: 600;
+}

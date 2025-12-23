@@ -6,19 +6,19 @@
   <view class="top-decoration"></view>
 
   <view class="content-wrapper">
-    
+
     <view class="user-card">
       <view class="card-inner">
         <button class="user-avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
           <image src="{{userInfo.avatarUrl || '../../asset/imgs/avatar.png'}}" mode="aspectFill" class="avatar-img"></image>
         </button>
-        
+
         <view class="user-info-box">
           <view class="user-name-row">
             <text class="user-name">{{userInfo.name || '点击登录'}}</text>
             <view class="login-tag" wx:if="{{!isLogin}}">未登录</view>
           </view>
-          
+
           <view class="user-meta" wx:if="{{isLogin}}">
             <view class="meta-tag class-tag">
               <van-icon name="friends" size="12px" style="margin-right:4px"/>
@@ -35,7 +35,7 @@
       <view class="card-header">
         <text class="header-title">学习助手</text>
       </view>
-      <van-grid column-num="2" border="{{false}}" gutter="{{10}}">
+      <van-grid column-num="3" border="{{false}}" gutter="{{10}}">
         <van-grid-item use-slot url="/pages/course/index" link-type="navigateTo">
           <view class="grid-custom-item">
             <view class="icon-box blue-icon">
@@ -52,6 +52,15 @@
             </view>
             <text class="grid-text">成绩查询</text>
             <text class="grid-sub">期末成绩概览</text>
+          </view>
+        </van-grid-item>
+        <van-grid-item use-slot url="/pages/gpa-calculator/index" link-type="navigateTo">
+          <view class="grid-custom-item">
+            <view class="icon-box purple-icon">
+              <van-icon name="balance-o" size="24px" color="#fff"/>
+            </view>
+            <text class="grid-text">GPA计算器</text>
+            <text class="grid-sub">绩点计算工具</text>
           </view>
         </van-grid-item>
       </van-grid>

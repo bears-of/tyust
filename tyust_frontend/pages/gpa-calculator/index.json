@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "GPA计算器",
+  "usingComponents": {
+    "cu-custom": "/style/colorui/components/cu-custom"
+  }
+}

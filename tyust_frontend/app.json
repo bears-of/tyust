@@ -6,7 +6,8 @@
     "pages/course/index",
     "pages/mine/index",
     "pages/course-detail/index",
-    "pages/login-verify/index"
+    "pages/login-verify/index",
+    "pages/gpa-calculator/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

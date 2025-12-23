@@ -1,0 +1,149 @@
+<!-- GPA 计算器页面 -->
+<cu-custom bgColor="bg-white" isBack="{{true}}">
+  <view slot="backText">返回</view>
+  <view slot="content">GPA 计算器</view>
+</cu-custom>
+
+<view class="container">
+  <!-- 顶部操作栏 -->
+  <view class="header">
+    <view class="header-left">
+      <picker mode="selector" range="{{gpaStandards}}" range-key="name" value="{{gpaStandardIndex}}" bindchange="changeGPAStandard">
+        <view class="standard-picker">
+          <text>{{gpaStandards[gpaStandardIndex].name}}</text>
+          <text class="cuIcon-unfold"></text>
+        </view>
+      </picker>
+    </view>
+    <view class="header-right">
+      <view class="action-btn" bindtap="exportData">
+        <text class="cuIcon-upload"></text>
+        <text>导出</text>
+      </view>
+      <view class="action-btn" bindtap="clearAll">
+        <text class="cuIcon-delete"></text>
+        <text>清空</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- GPA 结果展示卡片 -->
+  <view class="result-card">
+    <view class="result-main">
+      <view class="gpa-value">{{gpa}}</view>
+      <view class="gpa-label">总 GPA</view>
+    </view>
+    <view class="result-details">
+      <view class="detail-item">
+        <view class="detail-value">{{totalCredits}}</view>
+        <view class="detail-label">总学分</view>
+      </view>
+      <view class="detail-divider"></view>
+      <view class="detail-item">
+        <view class="detail-value">{{courses.length}}</view>
+        <view class="detail-label">课程数</view>
+      </view>
+      <view class="detail-divider"></view>
+      <view class="detail-item">
+        <view class="detail-value">{{weightedSum}}</view>
+        <view class="detail-label">加权总分</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程列表 -->
+  <view class="course-list">
+    <view class="list-header">
+      <text class="list-title">课程列表</text>
+      <view class="add-btn" bindtap="showAddCourseModal">
+        <text class="cuIcon-add"></text>
+        <text>添加课程</text>
+      </view>
+    </view>
+
+    <view wx:if="{{courses.length > 0}}" class="courses">
+      <view class="course-item" wx:for="{{courses}}" wx:key="index">
+        <view class="course-info">
+          <view class="course-header">
+            <view class="course-name">{{item.courseName}}</view>
+            <view class="course-score">{{item.score}}</view>
+          </view>
+          <view class="course-details">
+            <text class="detail-text">学分: {{item.credit}}</text>
+            <text class="detail-text">绩点: {{item.score >= 90 ? (calculationMethod == '4.0' ? '4.0' : '5.0') : item.score >= 85 ? (calculationMethod == '4.0' ? '3.7' : '4.5') : item.score >= 82 ? (calculationMethod == '4.0' ? '3.3' : '4.0') : item.score >= 78 ? (calculationMethod == '4.0' ? '3.0' : '3.5') : item.score >= 75 ? (calculationMethod == '4.0' ? '2.7' : '3.0') : item.score >= 72 ? (calculationMethod == '4.0' ? '2.3' : '2.5') : item.score >= 68 ? (calculationMethod == '4.0' ? '2.0' : '2.0') : item.score >= 64 ? '1.5' : item.score >= 60 ? '1.0' : '0.0'}}</text>
+          </view>
+        </view>
+        <view class="course-actions">
+          <view class="action-icon" bindtap="editCourse" data-index="{{index}}">
+            <text class="cuIcon-edit"></text>
+          </view>
+          <view class="action-icon delete" bindtap="deleteCourse" data-index="{{index}}">
+            <text class="cuIcon-delete"></text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="empty-list">
+      <text class="cuIcon-form"></text>
+      <text class="empty-text">暂无课程数据</text>
+      <text class="empty-hint">点击上方"添加课程"按钮添加</text>
+    </view>
+  </view>
+
+  <!-- GPA 说明 -->
+  <view class="gpa-info">
+    <view class="info-title">
+      <text class="cuIcon-info"></text>
+      <text>GPA 计算说明</text>
+    </view>
+    <view class="info-content">
+      <view class="info-section">
+        <text class="info-subtitle">4.0 标准:</text>
+        <text class="info-text">90-100=4.0, 85-89=3.7, 82-84=3.3, 78-81=3.0, 75-77=2.7, 72-74=2.3, 68-71=2.0, 64-67=1.5, 60-63=1.0, 小于60=0</text>
+      </view>
+      <view class="info-section">
+        <text class="info-subtitle">5.0 标准:</text>
+        <text class="info-text">90-100=5.0, 85-89=4.5, 82-84=4.0, 78-81=3.5, 75-77=3.0, 72-74=2.5, 68-71=2.0, 64-67=1.5, 60-63=1.0, 小于60=0</text>
+      </view>
+      <view class="info-section">
+        <text class="info-subtitle">计算公式:</text>
+        <text class="info-text">GPA = Σ(课程绩点 × 课程学分) / Σ课程学分</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 添加/编辑课程弹窗 -->
+<view class="modal-mask" wx:if="{{showAddModal}}" bindtap="closeModal">
+  <view class="modal-container" catchtap="{{true}}">
+    <view class="modal-header">
+      <text class="modal-title">{{editingIndex >= 0 ? '编辑课程' : '添加课程'}}</text>
+      <view class="modal-close" bindtap="closeModal">
+        <text class="cuIcon-close"></text>
+      </view>
+    </view>
+
+    <view class="modal-body">
+      <view class="form-item">
+        <view class="form-label">课程名称</view>
+        <input class="form-input" placeholder="请输入课程名称" value="{{formData.courseName}}" bindinput="onCourseNameInput" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">学分</view>
+        <input class="form-input" type="digit" placeholder="请输入学分" value="{{formData.credit}}" bindinput="onCreditInput" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">成绩</view>
+        <input class="form-input" type="number" placeholder="请输入成绩(0-100)" value="{{formData.score}}" bindinput="onScoreInput" />
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <view class="modal-btn cancel" bindtap="closeModal">取消</view>
+      <view class="modal-btn confirm" bindtap="saveCourse">保存</view>
+    </view>
+  </view>
+</view>
